@@ -1,0 +1,17 @@
+# Every workflow starts with a name. The name will be displayed on the Actions page and on any badges.
+name: CI workflow
+
+# Adding event triggers
+on:
+  push:
+    branches: [ main ] # You can list branches as elements in an array
+
+  pull_request: 
+    branches:
+      - main # You can also list branches using a hyphen
+
+# Adding jobs
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: python:3.9-slim # It is important to consistently use the same version of dependencies and operating system for all phases of development including the CI pipeline.
