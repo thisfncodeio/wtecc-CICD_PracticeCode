@@ -1,5 +1,13 @@
 apiVersion: triggers.tekton.dev/v1beta1
 kind: EventListener
 metadata:
-  name: <place-name-here>
+  name: cd-listener
 spec:
+  serviceAccountName: pipeline
+  # Defining the trickers that will define the bindings and template
+  triggers:
+    # Since there can be multiple triggers, make sure you define - bindings as a list using the dash - prefix. Also since there can be multiple bindings, make sure you defne the - ref: with a dash - prefix as well.
+    - bindings:
+      - ref: cd-binding
+      template:
+        ref: cd-template

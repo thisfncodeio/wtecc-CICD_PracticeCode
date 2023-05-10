@@ -1,6 +1,45 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: <place-name-here>
+  # Naming the Task
+  name: echo
 spec:
+  # Adding params that can be used by different steps
+  params:
+    # Name the param for use later. Since there can be multiple parameters, each one starts with a dash `-` to identify it as an item in a `yaml` list.
+    - name: message
+      # Adding a description for the named param
+      description: The message to echo
+      # Adding the param type
+      type: string
   steps:
+    # Step #1
+    - name: echo-message # Naming the step
+      image: alpine:3
+      command: [/bin/echo] # Terminal commands
+      args: ["$(params.message)"] # Making use of the argument being passed by adding a reference to the parameter, ie. args; ["Some text I passed"] 
+--- # You can have multiple definitions in a single yaml file by separating them with three dashes --- on a single line.
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  # Naming the Task
+  name: checkout
+spec:
+  # Adding params that can be used by different steps
+  params:
+    # Name the param for use later. Since there can be multiple parameters, each one starts with a dash `-` to identify it as an item in a `yaml` list.
+    - name: repo-url
+      # Adding a description for the named param
+      description: The URL of the git repo to clone
+      # Adding the param type
+      type: string
+      
+    - name: branch
+      description: The branch to clone
+      type: string
+  steps:
+    # Step #1
+    - name: checkout # Naming the step
+      image: bitnami/git:latest
+      command: [git] # Terminal commands
+      args: ["clone", "--branch", "$(params.branch)", "$(params.repo-url)"]

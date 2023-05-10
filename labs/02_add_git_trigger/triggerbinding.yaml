@@ -1,5 +1,10 @@
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
-  name: <place-name-here>
+  name: cd-binding # Give the TriggerBinding the same name that is referenced in the EventListener
 spec:
+  params:
+    - name: repository
+      value: $(body.repository.url)
+    - name: branch
+      value: $(body.ref)

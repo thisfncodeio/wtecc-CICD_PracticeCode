@@ -1,14 +1,28 @@
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
-  name: <place-name-here>
+  name: cd-template
 spec:
   params:
   # Add parameters here
+    - name: repository
+      description: The git repo
+      default: " "
+    - name: branch
+      description: the branch for the git repo
+      default: master
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
         generateName: cd-pipeline-run-
       spec:
-      # Add pipeline definition here
+        # Add pipeline definition here
+        serviceAccountName: pipeline
+        pipelineRef:
+          name: cd-pipeline
+        params:
+          - name: repo-url # Note that while the parameter you bound from the event is repository, you pass it on as repo-url to the pipeline. This is to show that the names do not have to match, allowing you to use any pipeline to map parameters into.
+            value: $(tt.params.repository) # Value referencing the TriggerTemplate `repository` parameter above
+          - name: branch
+            value: $(tt.params.branch) # Value referencing the TriggerTemplate `branch` parameter above

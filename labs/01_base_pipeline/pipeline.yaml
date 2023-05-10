@@ -1,6 +1,75 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:  
-  name: <place-name-here>
+  # Naming the Pipeline
+  name: hello-pipeline
 spec:
+  params:
+    - name: message
+  # Adding a reference to a Task (Notice that this is called `tasks:` and not `steps:`)
   tasks:
+    # Naming the Task. Since there can be multiple tasks, each one starts with a dash `-` to identify it as an item in a `yaml` list.
+    - name: hello
+      taskRef:
+        name: echo # The actual name of the task from the task.yml file
+      params:
+        - name: message
+          value: "$(params.message)" # Reference to the pipeline parameter from line 8
+--- # You can use --- on a separate line to separate your new pipeline, or you can modify the existing pipeline to look like the new one.
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  # Naming the Pipeline
+  name: cd-pipeline
+spec:
+  params:
+    - name: repo-url
+    - name: branch
+      default: "master"
+  # Adding a reference to a Task (Notice that this is called `tasks:` and not `steps:`)
+  tasks:
+    # Naming the Task. Since there can be multiple tasks, each one starts with a dash `-` to identify it as an item in a `yaml` list.
+    - name: clone
+      taskRef:
+        name: checkout # The actual name of the task from the task.yml file
+      params:
+      - name: repo-url
+        value: "$(params.repo-url)" # Reference to the pipeline parameter from line 26
+      - name: branch
+        value: "$(params.branch)" # Reference to the pipeline parameter from line 27
+
+    - name: lint
+      taskRef:
+        name: echo
+      params:
+      - name: message
+        value: "Calling Flake8 linter..."
+      runAfter:
+        - clone
+
+    - name: tests
+      taskRef:
+        name: echo
+      params:
+      - name: message
+        value: "Running unit tests with PyUnit..."
+      runAfter:
+        - lint
+
+    - name: build
+      taskRef:
+        name: echo
+      params:
+      - name: message
+        value: "Building image for $(params.repo-url) ..."
+      runAfter:
+        - tests
+        
+    - name: deploy
+      taskRef:
+        name: echo
+      params:
+      - name: message
+        value: "Deploying $(params.branch) branch of $(params.repo-url) ..."
+      runAfter:
+        - build
